@@ -1,0 +1,70 @@
+
+buildscript {
+    dependencies{
+        classpath group: 'com.assertthat.plugins', name: 'assertthat-bdd-gradle-tasks', version: '1.0-SNAPSHOT'
+    }
+    repositories {
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testRuntime
+    }
+}
+
+dependencies {
+    testCompile group: 'io.cucumber', name: 'cucumber-java', version: '4.2.0'
+    testCompile group: 'io.cucumber', name: 'cucumber-junit', version: '4.2.0'
+}
+
+task downloadFeatures(type: FeaturesTask){
+    /*Jira project id e.g. 10001*/
+    projectId ="PROJECT_ID"
+    /*Optional can be supplied as environment variable ASSERTTHAT_ACCESS_KEY*/
+    accessKey = "ASSERTTHAT_ACCESS_KEY"
+    /*Optional can be supplied as environment variable ASSERTTHAT_SECRET_KEY*/
+    secretKey = "ASSERTTHAT_SECRET_KEY"
+    /*Optional - default ./feature*/
+    outputFolder = "src/test/resources"
+    /*Optional - all features downloaded by default - should be a valid JQL*/
+    jql = "project = XX AND key in ('XXX-1')"
+    /*Optional - default automated (can be one of: manual/automated/both)*/
+    mode = "automated"
+}
+
+task cucumber() {
+    dependsOn assemble, compileTestJava, downloadFeatures
+    doLast {
+        javaexec {
+            main = "cucumber.api.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'json:reports/cucumber.json', '--glue', 'gradle.cucumber', 'src/test/resources']
+        }
+    }
+}
+
+task submitReport(type: ReportTask){
+    dependsOn cucumber
+    /*Jira project id e.g. 10001*/
+    projectId ="PROJECT_ID"
+    /*Optional can be supplied as environment variable ASSERTTHAT_ACCESS_KEY*/
+    accessKey = "ASSERTTHAT_ACCESS_KEY"
+    /*Optional can be supplied as environment variable ASSERTTHAT_SECRET_KEY*/
+    secretKey = "ASSERTTHAT_SECRET_KEY"
+    /*The name of the run - default 'Test run dd MMM yyyy HH:mm:ss'*/
+    runName = "Dry Tests Run"
+    /*Json report folder - default ./reports*/
+    jsonReportFolder = "reports"
+    /*Regex to search for cucumber reports - default **.json*/
+    jsonReportIncludePattern = "**/cucumber.json"
+}
+
+repositories {
+    jcenter()
+}
