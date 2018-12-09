@@ -1,7 +1,7 @@
 
 buildscript {
     dependencies{
-        classpath group: 'com.assertthat.plugins', name: 'assertthat-bdd-gradle-tasks', version: '1.0-SNAPSHOT'
+        classpath group: 'com.assertthat.plugins', name: 'assertthat-bdd-gradle-tasks', version: '1.1'
     }
     repositories {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
@@ -30,7 +30,7 @@ task downloadFeatures(type: FeaturesTask){
     accessKey = "ASSERTTHAT_ACCESS_KEY"
     /*Optional can be supplied as environment variable ASSERTTHAT_SECRET_KEY*/
     secretKey = "ASSERTTHAT_SECRET_KEY"
-    /*Optional - default ./feature*/
+    /*Optional - default ./features*/
     outputFolder = "src/test/resources"
     /*Optional - all features downloaded by default - should be a valid JQL*/
     jql = "project = XX AND key in ('XXX-1')"
